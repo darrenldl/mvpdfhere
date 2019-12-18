@@ -60,3 +60,12 @@ let of_json (x : Yojson.Basic.t) : t =
         | _ -> info
       ) empty
   | _ -> failwith "Unexpected case"
+
+let write ~json_path t =
+  Yojson.Basic.to_file json_path (to_json t)
+
+let load ~json_path : t =
+  try
+    Yojson.Basic.from_file json_path |> of_json
+  with
+  | _ -> empty
