@@ -13,13 +13,13 @@ let map_int_field_to_json (x : int option) : Yojson.Basic.t =
   match x with None -> `Null | Some x -> `Int x
 
 let map_string_field_to_json (x : string option) : Yojson.Basic.t =
-  match x with None -> `Null | Some x -> `String x
+  match x with None -> `String "" | Some x -> `String x
 
 let map_int_field_from_json (x : Yojson.Basic.t) : int option =
   match x with `Int x -> Some x | _ -> None
 
 let map_string_field_from_json (x : Yojson.Basic.t) : string option =
-  match x with `String x -> Some x | _ -> None
+  match x with `String "" -> None | `String x -> Some x | _ -> None
 
 let to_json (t : t) : Yojson.Basic.t =
   let l =

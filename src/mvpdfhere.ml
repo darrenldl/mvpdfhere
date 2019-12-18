@@ -72,13 +72,15 @@ let edit_loop ~pdf_file_path : (string, unit) result =
                            Option.map string_of_int info.year;
                            Option.map string_of_int info.month;
                            Option.map string_of_int info.day;
-                           info.journal;
-                           info.title;
-                           Some ".pdf";
+                           Option.map Normalize.normalize info.journal;
+                           Option.map Normalize.normalize info.title;
                          ]
                          |> List.filter_map (fun x -> x)
                        in
-                       let name = String.concat "__" parts in
+                       let name =
+                         String.concat Config.final_file_name_part_sep parts
+                         ^ ".pdf"
+                       in
                        Printf.printf "Computed file name is : \"%s\"\n" name;
                        match
                          ask_yns
