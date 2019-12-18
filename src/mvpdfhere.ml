@@ -1,3 +1,8 @@
+let write_text_dump ~pdf_file_path ~text_dump_path : (unit, int) result =
+  match Sys.command (Printf.sprintf "pdftotext -f 1 -l 1 -- \"%s\" - | head -n 20 > %s" pdf_file_path text_dump_path) with
+  | 0 -> Ok ()
+  | x -> Error x
+
 let () =
   let argv = Sys.argv in
   let arg_count = Array.length argv in
@@ -29,7 +34,10 @@ let () =
           else path
         in
         let text_dump_path = Filename.temp_file "mvpdfhere" ".txt" in
-        let json_path = Filename.temp_file "mvpdfhere" ".json" in
-        print_endline file
+        match write_text_dump ~pdf_file_path:file ~text_dump_path with
+        | Error x -> Printf.printf "Text dump command exited with return code %d" x
+        | Ok () ->
+          let json_path = Filename.temp_file "mvpdfhere" ".json" in
+          print_endline file
       else print_endline (Printf.sprintf "File \"%s\" does not exist" path)
     with Sys_error _ -> print_endline "Failed to access file"
