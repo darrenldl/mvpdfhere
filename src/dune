@@ -2,5 +2,5 @@
  (public_name mvpdfhere)
  (name mvpdfhere)
  (libraries)
- (flags (-w "+a-4-9-29-37-40-42-44-48-50-32" -ccopt -static))
+ (flags (-w "+a-4-9-29-37-40-42-44-48-50-32"))
  )
