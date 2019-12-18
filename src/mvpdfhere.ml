@@ -3,14 +3,14 @@ type yn =
   | `No
   ]
 
-let write_text_dump ~pdf_file_path ~text_dump_path : (unit, int) result =
-  match
-    Sys.command
-      (Printf.sprintf "pdftotext -f 1 -l 1 -- \"%s\" - | head -n 20 > %s"
-         pdf_file_path text_dump_path)
-  with
+let run_command cmd =
+  match Sys.command cmd with
   | 0 -> Ok ()
   | x -> Error x
+
+let write_text_dump ~pdf_file_path ~text_dump_path : (unit, int) result =
+  run_command (Printf.sprintf "pdftotext -f 1 -l 1 -- \"%s\" - | head -n 20 > %s"
+                 pdf_file_path text_dump_path)
 
 let ask_yn ~prompt : yn =
   let rec aux prompt answer =
@@ -31,6 +31,7 @@ let ask_yn ~prompt : yn =
 let edit_loop ~pdf_file_path : (string, unit) result =
   let rec aux ~pdf_file_path =
     let text_dump_path = Filename.temp_file "mvpdfhere" ".txt" in
+    let raw_json_path = Filename.temp_file "mvpdfhere" ".json" in
     let json_path = Filename.temp_file "mvpdfhere" ".json" in
     let name =
       Fun.protect
@@ -42,38 +43,43 @@ let edit_loop ~pdf_file_path : (string, unit) result =
            | Error x ->
              Printf.printf "Text dump command exited with return code %d\n" x;
              Error ()
-           | Ok () -> (
-               Info.write ~json_path Info.empty;
-               match
-                 Sys.command
-                   (Printf.sprintf "vim -O %s %s" json_path text_dump_path)
+           | Ok () ->
+             Info.write ~json_path:raw_json_path Info.empty;
+             match run_command (Printf.sprintf "cat %s | jq > %s" raw_json_path json_path) with
+             | Error x ->
+               Printf.printf "Jq exited with return code %d" x;
+               Error ()
+             | Ok () ->
+               match run_command
+                       (Printf.sprintf "vim -O %s %s" json_path text_dump_path)
                with
-               | 0 -> (
-                   let info = Info.load ~json_path in
-                   let parts =
-                     [
-                       Option.map string_of_int info.year;
-                       Option.map string_of_int info.month;
-                       Option.map string_of_int info.day;
-                       info.journal;
-                       info.title;
-                       Some ".pdf";
-                     ]
-                     |> List.filter_map (fun x -> x)
-                   in
-                   let name = String.concat "__" parts in
-                   Printf.printf "Computed file name is : \"%s\"\n" name;
-                   match
-                     ask_yn
-                       ~prompt:
-                         (Printf.sprintf
-                            "Move PDF file to current dir using above name (n = redo, Ctrl+C to exit)?")
-                   with
-                   | `Yes -> Ok (Some name)
-                   | `No -> Ok None )
-               | x ->
+               | Error x ->
                  Printf.printf "Vim exited with return code %d\n" x;
-                 Error () ))
+                 Error ()
+               | Ok () ->
+                 let info = Info.load ~json_path in
+                 let parts =
+                   [
+                     Option.map string_of_int info.year;
+                     Option.map string_of_int info.month;
+                     Option.map string_of_int info.day;
+                     info.journal;
+                     info.title;
+                     Some ".pdf";
+                   ]
+                   |> List.filter_map (fun x -> x)
+                 in
+                 let name = String.concat "__" parts in
+                 Printf.printf "Computed file name is : \"%s\"\n" name;
+                 match
+                   ask_yn
+                     ~prompt:
+                       (Printf.sprintf
+                          "Move PDF file to current dir using above name (n = redo, Ctrl+C to exit)?")
+                 with
+                 | `Yes -> Ok (Some name)
+                 | `No -> Ok None
+        )
     in
     match name with
     | Error () -> Error ()
