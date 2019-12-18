@@ -62,12 +62,12 @@ let edit_loop ~pdf_file_path : (string, unit) result =
                      |> List.filter_map (fun x -> x)
                    in
                    let name = String.concat "__" parts in
-                   Printf.printf "Computed file name is : %s\n" name;
+                   Printf.printf "Computed file name is : \"%s\"\n" name;
                    match
                      ask_yn
                        ~prompt:
                          (Printf.sprintf
-                            "Move PDF file to current dir using above name?")
+                            "Move PDF file to current dir using above name (n = redo, Ctrl+C to exit)?")
                    with
                    | `Yes -> Ok (Some name)
                    | `No -> Ok None )
