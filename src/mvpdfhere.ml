@@ -58,18 +58,29 @@ let edit_loop ~pdf_file_path : (string, unit) result =
                      Error ()
                    | Ok () -> (
                        let info = Info.load ~json_path in
-                       let parts =
-                         [
+                       let date_parts = [
                            Option.map string_of_int info.year;
                            Option.map string_of_int info.month;
                            Option.map string_of_int info.day;
+                       ]
+                                      |> List.filter_map (fun x -> x)
+                       in
+                       let date =
+                         match date_parts with
+                         | [] -> None
+                         | l ->
+                           Some (String.concat Config.date_sep l)
+                       in
+                       let name_parts =
+                         [
+                           date;
                            Option.map Normalize.normalize info.journal;
                            Option.map Normalize.normalize info.title;
                          ]
                          |> List.filter_map (fun x -> x)
                        in
                        let name =
-                         String.concat Config.final_file_name_part_sep parts
+                         String.concat Config.final_file_name_part_sep name_parts
                          ^ ".pdf"
                        in
                        Printf.printf "Computed file name is : \"%s\"\n" name;
