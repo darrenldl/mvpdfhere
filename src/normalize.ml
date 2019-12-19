@@ -1,7 +1,8 @@
 let normalize (s : string) : string =
   s |> String.split_on_char ' '
   |> List.filter (fun s -> s <> "")
-  |> List.map String.lowercase_ascii
+  |> List.map (fun s ->
+      if s = String.uppercase_ascii s then s else String.lowercase_ascii s)
   |> List.map String.to_seq
   |> List.map
     (Seq.filter (fun c -> not (String.contains Config.excluded_chars c)))
