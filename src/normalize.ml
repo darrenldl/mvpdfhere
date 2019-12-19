@@ -16,6 +16,7 @@ let replace_with_predefined_rules s =
 let normalize (s : string) : string =
   s |> String.split_on_char ' '
   |> List.filter (fun s -> s <> "")
+  |> List.map replace_with_predefined_rules
   |> List.map (fun s ->
       if s = String.uppercase_ascii s then s else String.lowercase_ascii s)
   |> List.map String.to_seq
