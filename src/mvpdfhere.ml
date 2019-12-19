@@ -61,12 +61,8 @@ let edit_loop ~pdf_file_path : (string, unit) result =
                    let date_parts =
                      [
                        Option.map string_of_int info.year;
-                       Option.map (fun x ->
-                           Printf.sprintf "%02d" x)
-                            info.month;
-                       Option.map (fun x ->
-                           Printf.sprintf "%02d" x)
-                       info.day;
+                       Option.map (fun x -> Printf.sprintf "%02d" x) info.month;
+                       Option.map (fun x -> Printf.sprintf "%02d" x) info.day;
                      ]
                      |> List.filter_map (fun x -> x)
                    in
