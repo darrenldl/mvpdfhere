@@ -7,3 +7,5 @@ let final_name_sep = "_"
 let final_file_name_part_sep = "~~"
 
 let date_sep = "-"
+
+let normalize_replacements = [ ("ﬁ", "fi") ]
