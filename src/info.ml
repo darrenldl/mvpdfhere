@@ -53,7 +53,7 @@ let of_json (x : Yojson.Basic.t) : t =
          | "title" -> { info with title = map_string_field_from_json v }
          | _ -> info)
       empty
-  | _ -> failwith "Unexpected case"
+  | _ -> empty
 
 let write ~json_path t =
   let oc = open_out json_path in
