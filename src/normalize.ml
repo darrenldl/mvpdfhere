@@ -26,3 +26,24 @@ let normalize (s : string) : string =
   |> List.map (fun s ->
       if List.mem s Config.words_stay_lowercase then s else capitalize s)
   |> String.concat "_"
+
+let split_name_into_first_last (s : string) : (string option * string) option =
+  if String.contains s ',' then
+    let parts =
+      s
+      |> String.split_on_char ','
+      |> List.filter (fun s -> s <> "")
+    in
+    match parts with
+    | [] -> failwith "Unexpected case"
+    | [last] -> Some (None, last)
+    | l -> Some (Some (l |> List.rev |> List.hd), List.hd l)
+  else
+    let parts = s
+                |> String.split_on_char ' '
+                |> List.filter (fun s -> s <> "")
+    in
+    match parts with
+    | [] -> None
+    | [last] -> Some (None, last)
+    | l -> Some (Some (List.hd l), l |> List.rev |> List.hd)

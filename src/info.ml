@@ -4,7 +4,7 @@ type t = {
   day : int option;
   journal_or_conference : string option;
   publisher : string option;
-  authors : string option;
+  authors : string list;
   title : string option;
 }
 
@@ -15,7 +15,7 @@ let empty =
     day = None;
     journal_or_conference = None;
     publisher = None;
-    authors = None;
+    authors = [];
     title = None;
   }
 
@@ -31,11 +31,30 @@ let map_int_field_to_json_string (x : int option) : string =
 let map_string_field_to_json_string (x : string option) : string =
   match x with None -> "\"\"" | Some x -> Printf.sprintf "\"%s\"" x
 
+let map_string_list_field_to_json_string (l : string list) : string =
+  "["
+  ^
+  (
+    String.concat "," l
+  )
+  ^"]"
+
 let map_int_field_from_json (x : Yojson.Basic.t) : int option =
   match x with `Int x -> Some x | _ -> None
 
 let map_string_field_from_json (x : Yojson.Basic.t) : string option =
   match x with `String "" -> None | `String x -> Some x | _ -> None
+
+let map_string_list_field_from_json (x : Yojson.Basic.t) : string list =
+  match x with
+  | `List l ->
+    l
+   |> List.filter_map (fun x ->
+        match x with
+        | `String s -> Some s
+        | _ -> None
+      )
+  | _ -> []
 
 (* let to_json (t : t) : Yojson.Basic.t =
  *   let l =
@@ -66,6 +85,8 @@ let of_json (x : Yojson.Basic.t) : t =
            }
          | "publisher" ->
            { info with publisher = map_string_field_from_json v }
+         | "authors" ->
+           { info with authors = map_string_list_field_from_json v }
          | "title" -> { info with title = map_string_field_from_json v }
          | _ -> info)
       empty
@@ -84,6 +105,7 @@ let write ~json_path t =
            ( "journal_or_conference",
              map_string_field_to_json_string t.journal_or_conference );
            ("publisher", map_string_field_to_json_string t.publisher);
+           ("authors", map_string_list_field_to_json_string t.authors);
            ("title", map_string_field_to_json_string t.title);
          ]
          |> List.map (fun (k, v) -> Printf.sprintf "  \"%s\": %s" k v)
