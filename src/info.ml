@@ -4,6 +4,7 @@ type t = {
   day : int option;
   journal_or_conference : string option;
   publisher : string option;
+  authors : string option;
   title : string option;
 }
 
@@ -14,6 +15,7 @@ let empty =
     day = None;
     journal_or_conference = None;
     publisher = None;
+    authors = None;
     title = None;
   }
 
