@@ -1,5 +1,6 @@
 let normalize (s : string) : string =
   s |> String.split_on_char ' '
+  |> List.filter (fun s -> s <> "")
   |> List.map String.lowercase_ascii
   |> List.map String.to_seq
   |> List.map
