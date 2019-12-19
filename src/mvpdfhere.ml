@@ -36,7 +36,6 @@ let ask_yns ~prompt : yns =
 let edit_loop ~pdf_file_path : (string, unit) result =
   let rec aux ~pdf_file_path =
     let text_dump_path = Filename.temp_file "mvpdfhere" ".txt" in
-    let raw_json_path = Filename.temp_file "mvpdfhere" ".json" in
     let json_path = Filename.temp_file "mvpdfhere" ".json" in
     let name =
       Fun.protect
@@ -49,15 +48,7 @@ let edit_loop ~pdf_file_path : (string, unit) result =
              Printf.printf "Text dump command exited with return code %d\n" x;
              Error ()
            | Ok () -> (
-               Info.write ~json_path:raw_json_path Info.empty;
-               match
-                 run_command
-                   (Printf.sprintf "cat %s | jq > %s" raw_json_path json_path)
-               with
-               | Error x ->
-                 Printf.printf "Jq exited with return code %d" x;
-                 Error ()
-               | Ok () -> (
+               Info.write ~json_path Info.empty;
                    match
                      run_command
                        (Printf.sprintf "vim -O %s %s" json_path text_dump_path)
@@ -91,7 +82,7 @@ let edit_loop ~pdf_file_path : (string, unit) result =
                        with
                        | `Yes -> Ok (`Stop (Some name))
                        | `Stop -> Ok (`Stop None)
-                       | `No -> Ok `Retry ) ) ))
+                       | `No -> Ok `Retry ) ) )
     in
     match name with
     | Error () -> Error ()
