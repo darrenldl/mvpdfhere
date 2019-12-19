@@ -1,4 +1,4 @@
-let excluded_chars = " ,.-_|[]:?!@#$%^&*()"
+let excluded_chars = " ,._|[]:?!@#$%^&*()"
 
 let words_stay_lowercase = [ "in"; "of"; "for"; "to"; "with" ]
 
