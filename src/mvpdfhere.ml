@@ -51,7 +51,7 @@ let edit_loop ~pdf_file_path : (string, unit) result =
                Info.write ~json_path Info.empty;
                match
                  run_command
-                   (Printf.sprintf "vim -O %s %s" json_path text_dump_path)
+                   (Printf.sprintf "vim -o %s %s" json_path text_dump_path)
                with
                | Error x ->
                  Printf.printf "Vim exited with return code %d\n" x;
