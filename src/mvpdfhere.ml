@@ -74,7 +74,7 @@ let edit_loop ~pdf_file_path : (string, unit) result =
                    let name_parts =
                      [
                        date;
-                       Option.map Normalize.normalize info.journal;
+                       Option.map Normalize.normalize info.journal_or_conference;
                        Option.map Normalize.normalize info.title;
                      ]
                      |> List.filter_map (fun x -> x)

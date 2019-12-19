@@ -2,12 +2,12 @@ type t = {
   year : int option;
   month : int option;
   day : int option;
-  journal : string option;
+  journal_or_conference : string option;
   title : string option;
 }
 
 let empty =
-  { year = None; month = None; day = None; journal = None; title = None }
+  { year = None; month = None; day = None; journal_or_conference = None; title = None }
 
 let map_int_field_to_json (x : int option) : Yojson.Basic.t =
   match x with None -> `Null | Some x -> `Int x
@@ -33,7 +33,7 @@ let map_string_field_from_json (x : Yojson.Basic.t) : string option =
  *       ("year", map_int_field_to_json t.year);
  *       ("month", map_int_field_to_json t.month);
  *       ("day", map_int_field_to_json t.day);
- *       ("journal", map_string_field_to_json t.journal);
+ *       ("journal_or_conference", map_string_field_to_json t.journal_or_conference);
  *       ("title", map_string_field_to_json t.title);
  *     ]
  *   in
@@ -49,7 +49,7 @@ let of_json (x : Yojson.Basic.t) : t =
          | "year" -> { info with year = map_int_field_from_json v }
          | "month" -> { info with month = map_int_field_from_json v }
          | "day" -> { info with day = map_int_field_from_json v }
-         | "journal" -> { info with journal = map_string_field_from_json v }
+         | "journal_or_conference" -> { info with journal_or_conference = map_string_field_from_json v }
          | "title" -> { info with title = map_string_field_from_json v }
          | _ -> info)
       empty
@@ -65,7 +65,7 @@ let write ~json_path t =
            ("year", map_int_field_to_json_string t.year);
            ("month", map_int_field_to_json_string t.month);
            ("day", map_int_field_to_json_string t.day);
-           ("journal", map_string_field_to_json_string t.journal);
+           ("journal_or_conference", map_string_field_to_json_string t.journal_or_conference);
            ("title", map_string_field_to_json_string t.title);
          ]
          |> List.map (fun (k, v) -> Printf.sprintf "  \"%s\": %s" k v)
