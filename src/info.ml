@@ -3,6 +3,7 @@ type t = {
   month : int option;
   day : int option;
   journal_or_conference : string option;
+  publisher : string option;
   title : string option;
 }
 
@@ -12,6 +13,7 @@ let empty =
     month = None;
     day = None;
     journal_or_conference = None;
+    publisher = None;
     title = None;
   }
 
@@ -60,6 +62,8 @@ let of_json (x : Yojson.Basic.t) : t =
              info with
              journal_or_conference = map_string_field_from_json v;
            }
+         | "publisher" ->
+           { info with publisher = map_string_field_from_json v }
          | "title" -> { info with title = map_string_field_from_json v }
          | _ -> info)
       empty
@@ -77,6 +81,7 @@ let write ~json_path t =
            ("day", map_int_field_to_json_string t.day);
            ( "journal_or_conference",
              map_string_field_to_json_string t.journal_or_conference );
+           ("publisher", map_string_field_to_json_string t.publisher);
            ("title", map_string_field_to_json_string t.title);
          ]
          |> List.map (fun (k, v) -> Printf.sprintf "  \"%s\": %s" k v)
