@@ -30,20 +30,29 @@ let normalize (s : string) : string =
 let split_name_into_first_last (s : string) : (string option * string) option =
   if String.contains s ',' then
     let parts =
-      s
-      |> String.split_on_char ','
-      |> List.filter (fun s -> s <> "")
+      s |> String.split_on_char ',' |> List.filter (fun s -> s <> "")
     in
     match parts with
     | [] -> failwith "Unexpected case"
-    | [last] -> Some (None, last)
+    | [ last ] -> Some (None, last)
     | l -> Some (Some (l |> List.rev |> List.hd), List.hd l)
   else
-    let parts = s
-                |> String.split_on_char ' '
-                |> List.filter (fun s -> s <> "")
+    let parts =
+      s |> String.split_on_char ' ' |> List.filter (fun s -> s <> "")
     in
     match parts with
     | [] -> None
-    | [last] -> Some (None, last)
+    | [ last ] -> Some (None, last)
     | l -> Some (Some (List.hd l), l |> List.rev |> List.hd)
+
+let normalize_names l =
+  List.filter_map
+    (fun s ->
+       split_name_into_first_last s
+       |> Option.map (fun (first, last) ->
+           let first = Option.map normalize first in
+           let last = normalize last in
+           match first with
+           | None -> last
+           | Some first -> Printf.sprintf "%s_%s" first last))
+    l

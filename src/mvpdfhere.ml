@@ -76,6 +76,9 @@ let edit_loop ~pdf_file_path : (string, unit) result =
                        date;
                        Option.map Normalize.normalize info.journal_or_conference;
                        Option.map Normalize.normalize info.publisher;
+                       ( match Normalize.normalize_names info.authors with
+                         | [] -> None
+                         | l -> l |> String.concat ":" |> Option.some );
                        Option.map Normalize.normalize info.title;
                      ]
                      |> List.filter_map (fun x -> x)

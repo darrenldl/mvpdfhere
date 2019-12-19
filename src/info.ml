@@ -32,12 +32,7 @@ let map_string_field_to_json_string (x : string option) : string =
   match x with None -> "\"\"" | Some x -> Printf.sprintf "\"%s\"" x
 
 let map_string_list_field_to_json_string (l : string list) : string =
-  "["
-  ^
-  (
-    String.concat "," l
-  )
-  ^"]"
+  "[" ^ String.concat "," l ^ "]"
 
 let map_int_field_from_json (x : Yojson.Basic.t) : int option =
   match x with `Int x -> Some x | _ -> None
@@ -49,11 +44,8 @@ let map_string_list_field_from_json (x : Yojson.Basic.t) : string list =
   match x with
   | `List l ->
     l
-   |> List.filter_map (fun x ->
-        match x with
-        | `String s -> Some s
-        | _ -> None
-      )
+    |> List.filter_map (fun x ->
+        match x with `String s -> Some s | _ -> None)
   | _ -> []
 
 (* let to_json (t : t) : Yojson.Basic.t =
