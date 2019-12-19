@@ -49,51 +49,51 @@ let edit_loop ~pdf_file_path : (string, unit) result =
              Error ()
            | Ok () -> (
                Info.write ~json_path Info.empty;
+               match
+                 run_command
+                   (Printf.sprintf "vim -O %s %s" json_path text_dump_path)
+               with
+               | Error x ->
+                 Printf.printf "Vim exited with return code %d\n" x;
+                 Error ()
+               | Ok () -> (
+                   let info = Info.load ~json_path in
+                   let date_parts =
+                     [
+                       Option.map string_of_int info.year;
+                       Option.map string_of_int info.month;
+                       Option.map string_of_int info.day;
+                     ]
+                     |> List.filter_map (fun x -> x)
+                   in
+                   let date =
+                     match date_parts with
+                     | [] -> None
+                     | l -> Some (String.concat Config.date_sep l)
+                   in
+                   let name_parts =
+                     [
+                       date;
+                       Option.map Normalize.normalize info.journal;
+                       Option.map Normalize.normalize info.title;
+                     ]
+                     |> List.filter_map (fun x -> x)
+                   in
+                   let name =
+                     String.concat Config.final_file_name_part_sep name_parts
+                     ^ ".pdf"
+                   in
+                   Printf.printf "Computed file name is : \"%s\"\n" name;
                    match
-                     run_command
-                       (Printf.sprintf "vim -O %s %s" json_path text_dump_path)
+                     ask_yns
+                       ~prompt:
+                         (Printf.sprintf
+                            "Move PDF file to current dir using above name (n = \
+                             redo, s = stop)?")
                    with
-                   | Error x ->
-                     Printf.printf "Vim exited with return code %d\n" x;
-                     Error ()
-                   | Ok () -> (
-                       let info = Info.load ~json_path in
-                       let date_parts = [
-                           Option.map string_of_int info.year;
-                           Option.map string_of_int info.month;
-                           Option.map string_of_int info.day;
-                       ]
-                                      |> List.filter_map (fun x -> x)
-                       in
-                       let date =
-                         match date_parts with
-                         | [] -> None
-                         | l ->
-                           Some (String.concat Config.date_sep l)
-                       in
-                       let name_parts =
-                         [
-                           date;
-                           Option.map Normalize.normalize info.journal;
-                           Option.map Normalize.normalize info.title;
-                         ]
-                         |> List.filter_map (fun x -> x)
-                       in
-                       let name =
-                         String.concat Config.final_file_name_part_sep name_parts
-                         ^ ".pdf"
-                       in
-                       Printf.printf "Computed file name is : \"%s\"\n" name;
-                       match
-                         ask_yns
-                           ~prompt:
-                             (Printf.sprintf
-                                "Move PDF file to current dir using above name \
-                                 (n = redo, s = stop)?")
-                       with
-                       | `Yes -> Ok (`Stop (Some name))
-                       | `Stop -> Ok (`Stop None)
-                       | `No -> Ok `Retry ) ) )
+                   | `Yes -> Ok (`Stop (Some name))
+                   | `Stop -> Ok (`Stop None)
+                   | `No -> Ok `Retry ) ))
     in
     match name with
     | Error () -> Error ()

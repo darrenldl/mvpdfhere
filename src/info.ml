@@ -57,25 +57,24 @@ let of_json (x : Yojson.Basic.t) : t =
 
 let write ~json_path t =
   let oc = open_out json_path in
-  Fun.protect ~finally:(fun () -> close_out oc)
+  Fun.protect
+    ~finally:(fun () -> close_out oc)
     (fun () ->
-       let fields_str = [
-         "year", (map_int_field_to_json_string t.year);
-         "month", (map_int_field_to_json_string t.month);
-         "day", (map_int_field_to_json_string t.day);
-         "journal", (map_string_field_to_json_string t.journal);
-         "title", (map_string_field_to_json_string t.title);
-       ]
-         |> List.map (fun (k, v) ->
-             Printf.sprintf "  \"%s\": %s" k v
-           )
+       let fields_str =
+         [
+           ("year", map_int_field_to_json_string t.year);
+           ("month", map_int_field_to_json_string t.month);
+           ("day", map_int_field_to_json_string t.day);
+           ("journal", map_string_field_to_json_string t.journal);
+           ("title", map_string_field_to_json_string t.title);
+         ]
+         |> List.map (fun (k, v) -> Printf.sprintf "  \"%s\": %s" k v)
          |> String.concat ",\n"
        in
 
        Printf.fprintf oc "{\n";
        Printf.fprintf oc "%s\n" fields_str;
-       Printf.fprintf oc "}\n";
-    )
+       Printf.fprintf oc "}\n")
 
 let load ~json_path : t =
   try Yojson.Basic.from_file json_path |> of_json with _ -> empty
